@@ -20,6 +20,7 @@ export default function SearchPage() {
       setResults(res.data.results)
       setErrors(res.data.errors)
     } catch {
+      setResults([])
       setErrors(['검색 중 오류가 발생했습니다'])
     } finally {
       setLoading(false)
@@ -27,12 +28,16 @@ export default function SearchPage() {
   }
 
   async function handleAdd(station) {
-    await api.post('/favorites', {
-      station_id: station.station_id,
-      station_name: station.station_name,
-      city: station.city,
-    })
-    setAddedIds(prev => new Set([...prev, station.station_id]))
+    try {
+      await api.post('/favorites', {
+        station_id: station.station_id,
+        station_name: station.station_name,
+        city: station.city,
+      })
+      setAddedIds(prev => new Set([...prev, station.station_id]))
+    } catch {
+      setErrors(['즐겨찾기 추가 중 오류가 발생했습니다'])
+    }
   }
 
   return (
