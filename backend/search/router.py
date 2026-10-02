@@ -16,15 +16,15 @@ def search_stations(
 
     try:
         results += search_stations_seoul(q)
-    except Exception as e:
-        errors.append(f"서울 API 오류: {e}")
+    except Exception:
+        errors.append("서울 API 조회에 실패했습니다.")
 
     try:
         results += search_stations_gyeonggi(q)
-    except Exception as e:
-        errors.append(f"경기 API 오류: {e}")
+    except Exception:
+        errors.append("경기 API 조회에 실패했습니다.")
 
     if not results and errors:
-        raise HTTPException(status_code=502, detail="; ".join(errors))
+        raise HTTPException(status_code=502, detail="버스 정류장 검색에 실패했습니다. 잠시 후 다시 시도해주세요.")
 
     return {"results": results, "errors": errors}

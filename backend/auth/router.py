@@ -70,11 +70,12 @@ def google_callback(code: str, response: Response, db: Session = Depends(get_db)
 
     # 5. JWT → httpOnly cookie
     jwt_token = create_access_token(user.id)
-    redirect = RedirectResponse(url="http://localhost:5173/")
+    redirect = RedirectResponse(url=f"{settings.frontend_url}/")
     redirect.set_cookie(
         key="access_token",
         value=jwt_token,
         httponly=True,
+        secure=True,
         max_age=settings.jwt_expire_hours * 3600,
         samesite="lax",
     )
