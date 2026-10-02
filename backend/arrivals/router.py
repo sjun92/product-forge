@@ -1,3 +1,4 @@
+from typing import Literal
 from fastapi import APIRouter, Depends, Query
 from auth.dependencies import require_approved
 from arrivals.cache import arrival_cache
@@ -10,7 +11,7 @@ router = APIRouter(prefix="/arrivals", tags=["arrivals"])
 @router.get("")
 def get_arrivals(
     station_id: str = Query(...),
-    city: str = Query(...),   # 'seoul' | 'gyeonggi'
+    city: Literal["seoul", "gyeonggi"] = Query(...),
     user: User = Depends(require_approved),
 ):
     fetcher = get_arrivals_seoul if city == "seoul" else get_arrivals_gyeonggi
@@ -19,9 +20,7 @@ def get_arrivals(
         data = arrival_cache.get(city, station_id, fetcher)
         return {"arrivals": data, "stale": False}
     except Exception as e:
-        # 캐시에 이전 데이터가 있으면 반환 (stale fallback)
-        key = f"{city}:{station_id}"
-        entry = arrival_cache._store.get(key)
-        if entry:
-            return {"arrivals": entry["data"], "stale": True, "error": str(e)}
+        stale_data = arrival_cache.get_stale(city, station_id)
+        if stale_data is not None:
+            return {"arrivals": stale_data, "stale": True, "error": str(e)}
         return {"arrivals": [], "stale": True, "error": str(e)}

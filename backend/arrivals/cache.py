@@ -22,6 +22,11 @@ class ArrivalCache:
         self._store[key] = {"data": data, "expires_at": now + self._ttl}
         return data
 
+    def get_stale(self, city: str, station_id: str) -> list[dict] | None:
+        """캐시에 저장된 데이터 반환. 만료 여부 무관. 없으면 None."""
+        entry = self._store.get(self._key(city, station_id))
+        return entry["data"] if entry else None
+
 
 # 전역 싱글턴 — 서버 프로세스 내 공유
 arrival_cache = ArrivalCache(ttl_seconds=30)
