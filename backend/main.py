@@ -5,6 +5,7 @@ from auth.router import router as auth_router
 from favorites.router import router as favorites_router
 from search.router import router as search_router
 from arrivals.router import router as arrivals_router
+from admin.router import router as admin_router
 
 app = FastAPI(title="버스 도착 알리미")
 
@@ -24,6 +25,7 @@ app.include_router(auth_router)
 app.include_router(favorites_router)
 app.include_router(search_router)
 app.include_router(arrivals_router)
+app.include_router(admin_router)
 
 @app.get("/health")
 def health():
