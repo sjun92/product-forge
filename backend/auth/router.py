@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
+from urllib.parse import urlencode
 import httpx
 
 from config import settings
@@ -24,8 +25,7 @@ def google_login():
         "scope": "openid email profile",
         "access_type": "offline",
     }
-    query = "&".join(f"{k}={v}" for k, v in params.items())
-    return RedirectResponse(f"{GOOGLE_AUTH_URL}?{query}")
+    return RedirectResponse(f"{GOOGLE_AUTH_URL}?{urlencode(params)}")
 
 
 @router.get("/callback")
