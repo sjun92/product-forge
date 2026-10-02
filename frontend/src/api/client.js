@@ -2,14 +2,15 @@ import axios from 'axios'
 
 const api = axios.create({
   baseURL: '/',
-  withCredentials: true,   // httpOnly cookie 자동 전송
+  withCredentials: true,
 })
 
-// 401 응답 → 로그인 페이지로 이동
 api.interceptors.response.use(
   res => res,
   err => {
-    if (err.response?.status === 401) {
+    // /auth/me의 401은 정상적인 비로그인 상태 — AuthContext에서 처리
+    const isAuthMe = err.config?.url?.includes('/auth/me')
+    if (err.response?.status === 401 && !isAuthMe) {
       window.location.href = '/login'
     }
     return Promise.reject(err)
