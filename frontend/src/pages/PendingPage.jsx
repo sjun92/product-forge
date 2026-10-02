@@ -5,8 +5,11 @@ export default function PendingPage() {
   const navigate = useNavigate()
 
   async function handleLogout() {
-    await api.post('/auth/logout')
-    navigate('/login')
+    try {
+      await api.post('/auth/logout')
+    } finally {
+      navigate('/login')
+    }
   }
 
   return (
