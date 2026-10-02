@@ -30,7 +30,7 @@ export default function ArrivalList({ stationId, city }) {
     <ul style={styles.list}>
       {stale && <li style={styles.stale}>⚠ 이전 정보 표시 중</li>}
       {arrivals.map((a, i) => (
-        <li key={i} style={styles.item}>
+        <li key={`${a.route_name}-${i}`} style={styles.item}>
           <span style={styles.route}>{a.route_name}</span>
           <span style={styles.msg}>{a.arrival_msg}</span>
         </li>

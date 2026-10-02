@@ -29,7 +29,11 @@ export default function DashboardPage() {
     const newIndex = favorites.findIndex(f => f.id === over.id)
     const newOrder = arrayMove(favorites, oldIndex, newIndex)
     setFavorites(newOrder)
-    await api.patch('/favorites/reorder', { order: newOrder.map(f => f.id) })
+    try {
+      await api.patch('/favorites/reorder', { order: newOrder.map(f => f.id) })
+    } catch {
+      setFavorites(favorites)  // 서버 실패 시 원래 순서로 롤백
+    }
   }
 
   async function handleDelete(id) {
