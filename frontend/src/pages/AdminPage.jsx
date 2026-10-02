@@ -6,17 +6,31 @@ import UserRow from '../components/UserRow'
 export default function AdminPage() {
   const navigate = useNavigate()
   const [users, setUsers] = useState([])
-  const [tab, setTab] = useState('pending')   // 'pending' | 'all'
+  const [tab, setTab] = useState('pending')
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [loadingId, setLoadingId] = useState(null)
 
   useEffect(() => {
-    api.get('/admin/users').then(res => setUsers(res.data))
+    api.get('/admin/users')
+      .then(res => setUsers(res.data))
+      .catch(() => setError('사용자 목록을 불러오지 못했습니다'))
+      .finally(() => setIsLoading(false))
   }, [])
 
   async function handleApprove(userId, isApproved) {
-    await api.patch(`/admin/users/${userId}/approve`, { is_approved: isApproved })
-    setUsers(prev =>
-      prev.map(u => u.id === userId ? { ...u, is_approved: isApproved } : u)
-    )
+    if (loadingId !== null) return
+    const snapshot = users
+    setLoadingId(userId)
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, is_approved: isApproved } : u))
+    try {
+      await api.patch(`/admin/users/${userId}/approve`, { is_approved: isApproved })
+    } catch {
+      setUsers(snapshot)
+      setError('상태 변경 중 오류가 발생했습니다')
+    } finally {
+      setLoadingId(null)
+    }
   }
 
   const displayed = tab === 'pending'
@@ -29,6 +43,8 @@ export default function AdminPage() {
         <button onClick={() => navigate('/')} style={styles.back}>← 대시보드</button>
         <h2 style={styles.title}>관리자 — 사용자 관리</h2>
       </header>
+
+      {error && <p style={styles.error}>{error}</p>}
 
       <div style={styles.tabs}>
         <button
@@ -54,11 +70,18 @@ export default function AdminPage() {
           </tr>
         </thead>
         <tbody>
-          {displayed.length === 0 ? (
+          {isLoading ? (
+            <tr><td colSpan={4} style={styles.empty}>불러오는 중...</td></tr>
+          ) : displayed.length === 0 ? (
             <tr><td colSpan={4} style={styles.empty}>해당 사용자 없음</td></tr>
           ) : (
             displayed.map(u => (
-              <UserRow key={u.id} user={u} onApprove={handleApprove} />
+              <UserRow
+                key={u.id}
+                user={u}
+                onApprove={handleApprove}
+                disabled={loadingId !== null}
+              />
             ))
           )}
         </tbody>
@@ -86,4 +109,5 @@ const styles = {
   th: { padding: '10px 12px', background: '#f8f8f8', textAlign: 'left',
         fontSize: '0.85rem', color: '#666', fontWeight: 600 },
   empty: { padding: '24px', textAlign: 'center', color: '#999' },
+  error: { color: '#e74c3c', fontSize: '0.85rem', marginBottom: '12px' },
 }

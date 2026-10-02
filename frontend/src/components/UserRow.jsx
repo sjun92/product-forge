@@ -1,4 +1,4 @@
-export default function UserRow({ user, onApprove }) {
+export default function UserRow({ user, onApprove = () => {}, disabled = false }) {
   return (
     <tr>
       <td style={styles.td}>{user.name}</td>
@@ -10,11 +10,11 @@ export default function UserRow({ user, onApprove }) {
       </td>
       <td style={styles.td}>
         {user.is_approved ? (
-          <button onClick={() => onApprove(user.id, false)} style={styles.blockBtn}>
+          <button onClick={() => onApprove(user.id, false)} style={styles.blockBtn} disabled={disabled}>
             차단
           </button>
         ) : (
-          <button onClick={() => onApprove(user.id, true)} style={styles.approveBtn}>
+          <button onClick={() => onApprove(user.id, true)} style={styles.approveBtn} disabled={disabled}>
             승인
           </button>
         )}
